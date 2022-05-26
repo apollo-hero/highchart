@@ -1,0 +1,243 @@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="jquery-1.11.3.min.js"></script>
+
+
+<figure class="highcharts-figure">
+    <div id="container" style="text-align: center;"><img style="position: relative; top:50%;" src="Running heart.gif"></div>
+    <p class="highcharts-description">
+        A basic column chart compares rainfall values between four cities.
+        Tokyo has the overall highest amount of rainfall, followed by New York.
+        The chart is making use of the axis crosshair feature, to highlight
+        months as they are hovered over.
+    </p>
+</figure>
+<script type="text/javascript">
+
+    function getDateXDaysAgo(numOfDays, date = new Date()) {
+        const daysAgo = new Date(date.getTime());
+
+        daysAgo.setDate(date.getDate() - numOfDays);
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        let month = months[daysAgo.getMonth()];
+
+        let date1 = daysAgo.getDate();
+
+        return date1 + " of " + month;
+    }
+
+    const date = new Date();
+
+    const categories = [];
+
+    for (let index = 0; index <= 7; index++) {
+
+        categories[6 - index] = getDateXDaysAgo(index);
+
+    }
+    var pastData;
+    //console.log(categories);
+    var chart = new Highcharts.chart('container', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Acount Activities'
+                    },
+                    subtitle: {
+                        text: 'Source: WorldClimate.com'
+                    },
+                    xAxis: {
+                        categories: categories,
+                        crosshair: true
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'No. of Objects'
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                        footerFormat: '</table>',
+                        shared: true,
+                        useHTML: true
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [{
+                        name: 'online veh',
+                        //data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+                        data: []
+
+                    }, {
+                        name: 'offline veh',
+                        //data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
+                        data: []
+
+                    }, {
+                        name: 'engine idle',
+                        //data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
+                        data: []
+
+                    }, {
+                        name: 'vehicle tow',
+                        //data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
+                        data: []
+
+                    },
+                    {
+                        name: 'unkown errors',
+                        //data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
+                        data: []
+
+                    }]
+                });
+                
+
+</script>
+<script type="text/javascript">
+    function ajax() {
+        $.ajax({
+            url: 'new_db.php',
+            type: 'get',
+            data: {},
+            success: function (data) {
+                console.log(data);
+                pastData = data;
+                //chart.series[0].setData = data;
+                var chartData = [];
+
+                $.each(data.online,
+                    function (key, value) {
+                        var point = [];
+                        point.push(value);
+                        chartData.push(point);
+                    });
+                    chartData[6] = new Array(8);;
+                    console.log(chartData[0]);
+                    console.log(chartData);
+                chart.series[0].setData(chartData.reverse());
+                chartData = []
+                $.each(data.offline,
+                    function (key, value) {
+                        var point = [];
+                        point.push(value);
+                        chartData.push(point);
+                    });
+                chart.series[1].setData(chartData.reverse());
+                chartData = []
+                $.each(data.Idle,
+                    function (key, value) {
+                        var point = [];
+                        point.push(value);
+                        chartData.push(point);
+                    });
+                chart.series[2].setData(chartData.reverse());
+            }
+        });
+
+      
+    }
+    function realtime() {
+            $.ajax({
+                url: 'real.php',
+                type: 'get',
+                data: {},
+                success: function (data) {
+                    //chart.series[0].setData = data;
+                    var chartData = [];
+
+                    $.each(pastData.online,
+                        function (key, value) {
+                            var point = [];
+                            point.push(value);
+                            chartData.push(point);
+                        });
+                    chartData[6] = [data.online];
+                    chart.series[0].setData(chartData.reverse());
+                    chartData = []
+                    $.each(pastData.offline,
+                        function (key, value) {
+                            var point = [];
+                            point.push(value);
+                            chartData.push(point);
+                        });
+                        chartData[6] = [data.offline];
+                    chart.series[1].setData(chartData.reverse());
+                    chartData = []
+                    $.each(pastData.Idle,
+                        function (key, value) {
+                            var point = [];
+                            point.push(value);
+                            chartData.push(point);
+                        });
+                        chartData[6] = [data.Idle];
+                    chart.series[2].setData(chartData.reverse());
+                }
+            })
+        }
+
+    $(document).ready(function () {
+        setTimeout(ajax, 5000);
+        setInterval(realtime, 5000);
+    });
+</script>
+<style>
+    .highcharts-figure,
+    .highcharts-data-table table {
+        min-width: 310px;
+        max-width: 800px;
+        margin: 1em auto;
+    }
+
+    #container {
+        height: 400px;
+    }
+
+    .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table td,
+    .highcharts-data-table th,
+    .highcharts-data-table caption {
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table thead tr,
+    .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+    }
+
+    .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+    }
+</style>
